@@ -5,6 +5,7 @@
 
 #include "map_geometry.hpp"
 #include "map_scene.hpp"
+#include "plna/store_map_loader.hpp"
 
 namespace {
 
@@ -191,8 +192,26 @@ extern "C" JNIEXPORT jfloatArray JNICALL
 Java_by_smartplanogram_plnanote_nativebridge_NativeMapEngine_nativeBuildDrawList(
         JNIEnv* env,
         jclass) {
-    auto list = plna::map::MapScene::instance().buildDrawList();
+    const auto& list = plna::map::MapScene::instance().buildDrawList();
     return toJavaFloatArray(env, list);
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+Java_by_smartplanogram_plnanote_nativebridge_NativeMapEngine_nativeLoadStoreMapJson(
+        JNIEnv* env,
+        jclass,
+        jstring json) {
+    if (!json) return JNI_FALSE;
+    const auto text = jstringToStd(env, json);
+    const auto result = plna::map::loadStoreMapJson(text);
+    return result.ok ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_by_smartplanogram_plnanote_nativebridge_NativeMapEngine_nativeRevision(
+        JNIEnv*,
+        jclass) {
+    return static_cast<jlong>(plna::map::MapScene::instance().revision());
 }
 
 extern "C" JNIEXPORT void JNICALL
